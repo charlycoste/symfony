@@ -686,7 +686,11 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             'debug' => $this->debug,
             'inline_factories' => $buildParameters['.container.dumper.inline_factories'] ?? false,
             'inline_class_loader' => $buildParameters['.container.dumper.inline_class_loader'] ?? $this->debug,
-            'build_time' => $container->hasParameter('kernel.container_build_time') ? $container->getParameter('kernel.container_build_time') : time(),
+            'build_time' => match (true) {
+                $container->hasParameter('kernel.container_build_time') => $container->getParameter('kernel.container_build_time'),
+                isset($_SERVER['SOURCE_DATE_EPOCH']) => $_SERVER['SOURCE_DATE_EPOCH'],
+                default => time(),
+            },
             'preload_classes' => array_map('get_class', $this->bundles),
         ]);
 
